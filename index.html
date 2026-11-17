@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>برنامج إدارة الخانات والباقات</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background-color: #f8fafc;
+            color: #1e293b;
+            margin: 0;
+            padding: 15px;
+        }
+        .container { max-width: 1200px; margin: 0 auto; }
+        
+        #authScreen {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 85vh;
+        }
+        .auth-box {
+            background: white;
+            padding: 35px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 380px;
+            text-align: center;
+        }
+        .auth-box h2 { color: #4f46e5; margin-bottom: 15px; }
+        .auth-box input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            font-size: 1rem;
+            box-sizing: border-box;
+            text-align: center;
+        }
+        .link-btn {
+            color: #0284c7;
+            cursor: pointer;
+            margin-top: 12px;
+            display: block;
+            font-size: 0.85rem;
+            text-decoration: underline;
+        }
+
+        #appContent { display: none; }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: white;
+            padding: 15px 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+        
+        .stats-bar {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .stat-card {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #cbd5e1;
+            text-align: center;
+        }
+        .stat-card h4 { margin: 0 0 5px 0; font-size: 0.9rem; color: #64748b; }
+        .stat-card .val { font-size: 1.3rem; font-weight: bold; }
+        .val-success { color: #16a34a; }
+        .val-danger { color: #dc2626; }
+        .val-primary { color: #4f46e5; }
+
+        .btn {
+            background-color: #4f46e5;
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+            width: 100%;
+        }
+        .btn:hover { background-color: #4338ca; }
+        .btn-success { background-color: #16a34a; }
+        .btn-danger { background-color: #dc2626; }
+        .btn-secondary { background-color: #0ea5e9; font-size: 0.85rem; padding: 10px; }
+        
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .tab {
+            padding: 10px 25px;
+            background: #e2e8f0;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1rem;
+        }
+        .tab.active { background: #4f46e5; color: white; }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 25px;
+        }
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            border: 1px solid #cbd5e1;
+            border-bottom: 5px solid #4f46e5;
+        }
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            margin-bottom: 12px;
+        }
+        .person-row {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            padding: 10px;
+            background: #f8fafc;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #e2e8f0;
+        }
+        .person-inputs {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .person-inputs input {
+            width: 100%;
+            padding: 7px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            box-sizing: border-box;
+        }
+        .inputs-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+            box-sizing: border-box;
+        }
+        .source-tag {
+            font-size: 0.75rem;
+            color: #0284c7;
+            background: #e0f2fe;
+            padding: 3px 6px;
+            border-radius: 4px;
+            display: inline-block;
+        }
+        .card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 15px;
+            border-top: 1px solid #f1f5f9;
+            padding-top: 10px;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+        .modal-content {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            width: 350px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+    </style>
+</head>
+<body>
+
+<!-- شاشة تسجيل الدخول -->
+<div id="authScreen">
+    <div id="loginBox" class="auth-box">
+        <h2>تسجيل الدخول</h2>
+        <input type="password" id="appPassword" placeholder="كلمة المرور (افتراضي: 1234)">
+        <button class="btn" onclick="checkPassword()">دخول</button>
+        <span class="link-btn" style="color: #dc2626;" onclick="showAuthBox('recoverBox')">نسيت كلمة المرور؟</span>
+    </div>
+
+    <div id="recoverBox" class="auth-box" style="display: none;">
+        <h2>استرداد كلمة المرور</h2>
+        <p style="font-size: 0.8rem; color: #64748b; margin-top:0;">أدخل رقم التليفون أو الإيميل الخاص بك</p>
+        <input type="text" id="recoverInput" placeholder="اكتب رقمك أو إيميلك المسجل">
+        <button class="btn btn-secondary" style="color: white;" onclick="recoverPassword()">إظهار كلمة المرور</button>
+        <span class="link-btn" onclick="showAuthBox('loginBox')">العودة لتسجيل الدخول</span>
+    </div>
+</div>
+
+<!-- محتوى البرنامج -->
+<div id="appContent" class="container">
+    <header>
+        <h1 style="color: #4f46e5; margin: 0; font-size: 1.3rem;">إدارة الخانات والباقات</h1>
+        <div style="display: flex; gap: 10px;">
+            <button class="btn" style="width: auto;" onclick="openModal('addModal')">＋ إضافة خانة جديدة</button>
+            <button class="btn btn-danger" style="width: auto; padding: 10px 14px; font-size: 0.85rem;" onclick="lockApp()">قفل</button>
+        </div>
+    </header>
+
+    <div class="stats-bar">
+        <div class="stat-card">
+            <h4>إجمالي المحصل</h4>
+            <div id="totalPaid" class="val val-success">0 ج.م</div>
+        </div>
+        <div class="stat-card">
+            <h4>المتبقي</h4>
+            <div id="totalUnpaid" class="val val-danger">0 ج.م</div>
+        </div>
+        <div class="stat-card">
+            <h4>الإجمالي الكلي</h4>
+            <div id="totalAll" class="val val-primary">0 ج.م</div>
+        </div>
+    </div>
+
+    <div class="tabs">
+        <button class="tab active" onclick="switchTab('basic', this)">الخانات الأساسية</button>
+        <button class="tab" onclick="switchTab('extra', this)">الخانات الإضافية</button>
+    </div>
+
+    <div id="cardsContainer" class="grid"></div>
+</div>
+
+<!-- Modal: Add Card -->
+<div id="addModal" class="modal">
+    <div class="modal-content">
+        <h3>إضافة خانة جديدة</h3>
+        <input type="text" id="newCardName" placeholder="اسم الخانة أو رقم التليفون الرئيسي">
+        <select id="newCardType" style="padding: 10px; border-radius: 6px; border: 1px solid #cbd5e1;">
+            <option value="basic">أساسي</option>
+            <option value="extra">إضافيين</option>
+        </select>
+        <div style="display: flex; gap: 10px; justify-content: flex-end;">
+            <button class="btn btn-danger" style="width: auto;" onclick="closeModal('addModal')">إلغاء</button>
+            <button class="btn" style="width: auto;" onclick="addNewCard()">حفظ</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Import Person -->
+<div id="importModal" class="modal">
+    <div class="modal-content" style="width: 400px;">
+        <h3>نسخ شخص من الأساسي</h3>
+        <select id="basicPersonSelect" style="padding: 10px; border-radius: 6px; border: 1px solid #cbd5e1;"></select>
+        <div style="display: flex; gap: 10px; justify-content: flex-end;">
+            <button class="btn btn-danger" style="width: auto;" onclick="closeModal('importModal')">إلغاء</button>
+            <button class="btn btn-success" style="width: auto;" onclick="confirmImport()">تأكيد</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const APP_CONFIG = {
+        password: "1234",
+        contact: "01000000000"
+    };
+
+    // لو مفيش أي داتا قديمة، هنضيف خانة افتراضية أولية عشان الصفحة ما تفتحش فاضية أبداً
+    let savedData = localStorage.getItem('khanat_v5_data');
+    let data = savedData ? JSON.parse(savedData) : [
+        {
+            id: 1,
+            name: "الخانة التجريبية الأولى (أساسي)",
+            type: "basic",
+            persons: Array(7).fill().map(() => ({ name: '', phone: '', price: 0, paid: false, source: '' }))
+        }
+    ];
+
+    let currentTab = 'basic';
+    let activeImportTarget = null;
+
+    if (sessionStorage.getItem('isUnlocked') === 'true') {
+        unlockApp();
+    } else {
+        showAuthBox('loginBox');
+    }
+
+    function showAuthBox(boxId) {
+        document.getElementById('loginBox').style.display = 'none';
+        document.getElementById('recoverBox').style.display = 'none';
+        document.getElementById(boxId).style.display = 'block';
+    }
+
+    function checkPassword() {
+        let entered = document.getElementById('appPassword').value.trim();
+        if (entered === APP_CONFIG.password) {
+            sessionStorage.setItem('isUnlocked', 'true');
+            unlockApp();
+        } else {
+            alert('كلمة المرور غير صحيحة!');
+            document.getElementById('appPassword').value = '';
+        }
+    }
+
+    function recoverPassword() {
+        let val = document.getElementById('recoverInput').value.trim();
+        if (val === APP_CONFIG.contact) {
+            alert(`✅ تم التحقق بنجاح!\nكلمة المرور الخاصة بك هي: [ ${APP_CONFIG.password} ]`);
+            showAuthBox('loginBox');
+        } else {
+            alert('❌ رقم التليفون أو الإيميل غير مطابِق لما تم تسديله!');
+        }
+    }
+
+    function unlockApp() {
+        document.getElementById('authScreen').style.display = 'none';
+        document.getElementById('appContent').style.display = 'block';
+        render();
+    }
+
+    function lockApp() {
+        sessionStorage.removeItem('isUnlocked');
+        document.getElementById('appContent').style.display = 'none';
+        document.getElementById('authScreen').style.display = 'flex';
+        showAuthBox('loginBox');
+        document.getElementById('appPassword').value = '';
+    }
+
+    function openModal(id) { document.getElementById(id).style.display = 'flex'; }
+    function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+
+    function switchTab(tab, btn) {
+        currentTab = tab;
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        btn.classList.add('active');
+        render();
+    }
+
+    function addNewCard() {
+        let name = document.getElementById('newCardName').value.trim();
+        let type = document.getElementById('newCardType').value;
+        if (!name) return alert('أدخل اسم الخانة');
+
+        let newCard = {
+            id: Date.now(),
+            name: name,
+            type: type,
+            persons: Array(7).fill().map(() => ({ name: '', phone: '', price: 0, paid: false, source: '' }))
+        };
+
+        data.push(newCard);
+        saveAndRender();
+        closeModal('addModal');
+        document.getElementById('newCardName').value = '';
+    }
+
+    function deleteCard(id) {
+        if (confirm('حذف الخانة نهائياً؟')) {
+            data = data.filter(c => c.id !== id);
+            saveAndRender();
+        }
+    }
+
+    function saveSingleCard(cardId) {
+        saveAndRender();
+        alert('تم حفظ الخانة بنجاح!');
+    }
+
+    function saveAndRender() {
+        localStorage.setItem('khanat_v5_data', JSON.stringify(data));
+        render();
+    }
+
+    function updatePerson(cardId, index, field, value) {
+        let card = data.find(c => c.id === cardId);
+        if (!card) return;
+
+        if (field === 'paid') {
+            card.persons[index].paid = !card.persons[index].paid;
+            saveAndRender();
+        } else {
+            card.persons[index][field] = value;
+            updateStats();
+        }
+    }
+
+    function updateStats() {
+        let paid = 0, unpaid = 0;
+        data.forEach(c => {
+            c.persons.forEach(p => {
+                let pr = Number(p.price) || 0;
+                if (pr > 0) {
+                    if (p.paid) paid += pr;
+                    else unpaid += pr;
+                }
+            });
+        });
+        document.getElementById('totalPaid').innerText = paid + ' ج.م';
+        document.getElementById('totalUnpaid').innerText = unpaid + ' ج.م';
+        document.getElementById('totalAll').innerText = (paid + unpaid) + ' ج.م';
+    }
+
+    function openImport(cardId, personIndex) {
+        activeImportTarget = { cardId, personIndex };
+        let select = document.getElementById('basicPersonSelect');
+        select.innerHTML = '';
+        let found = false;
+
+        data.filter(c => c.type === 'basic').forEach(c => {
+            c.persons.forEach(p => {
+                if (p.name.trim() !== '') {
+                    found = true;
+                    let opt = document.createElement('option');
+                    opt.value = JSON.stringify({ cardName: c.name, name: p.name, phone: p.phone, price: p.price });
+                    opt.textContent = `${c.name} ➔ ${p.name}`;
+                    select.appendChild(opt);
+                }
+            });
+        });
+
+        if (!found) return alert('لا توجد أسماء مسجلة في الخانات الأساسية!');
+        openModal('importModal');
+    }
+
+    function confirmImport() {
+        let select = document.getElementById('basicPersonSelect');
+        if (!select.value) return;
+        let sel = JSON.parse(select.value);
+        let card = data.find(c => c.id === activeImportTarget.cardId);
+        if (card) {
+            let p = card.persons[activeImportTarget.personIndex];
+            p.name = sel.name;
+            p.phone = sel.phone;
+            p.price = sel.price;
+            p.source = `مأخوذ من أساسي: ${sel.cardName}`;
+            saveAndRender();
+        }
+        closeModal('importModal');
+    }
+
+    function render() {
+        let container = document.getElementById('cardsContainer');
+        container.innerHTML = '';
+        updateStats();
+
+        let filtered = data.filter(c => c.type === currentTab);
+        if (filtered.length === 0) {
+            container.innerHTML = `<p style="grid-column: 1/-1; text-align: center; color: #64748b; padding: 40px;">لا توجد خانات في هذا القسم حالياً.</p>`;
+            return;
+        }
+
+        filtered.forEach(card => {
+            let html = `
+                <div class="card">
+                    <div class="card-header">
+                        <span style="font-weight: bold; font-size: 1.1rem;">${card.name}</span>
+                        <button class="btn btn-danger" style="width: auto; padding: 2px 6px; font-size: 0.8rem;" onclick="deleteCard(${card.id})">حذف</button>
+                    </div>
+                    <div>
+            `;
+
+            card.persons.forEach((p, i) => {
+                let impBtn = card.type === 'extra' ? `<button class="btn btn-secondary" style="width: auto; padding: 4px 8px;" onclick="openImport(${card.id}, ${i})">نسخ</button>` : '';
+                html += `
+                    <div class="person-row">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span style="font-size: 0.85rem; font-weight: bold; color: #4f46e5;">الشخص ${i + 1}</span>
+                            <div style="display: flex; gap: 5px;">
+                                ${impBtn}
+                                <button class="btn ${p.paid ? 'btn-success' : 'btn-danger'}" style="width: auto; padding: 2px 8px; font-size: 0.75rem;" onclick="updatePerson(${card.id}, ${i}, 'paid')">
+                                    ${p.paid ? '✓ دفع' : '× ما دفعش'}
+                                </button>
+                            </div>
+                        </div>
+                        ${p.source ? `<div class="source-tag">${p.source}</div>` : ''}
+                        <div class="person-inputs">
+                            <input type="text" placeholder="اسم الشخص" value="${p.name.replace(/"/g, '&quot;')}" oninput="updatePerson(${card.id}, ${i}, 'name', this.value)">
+                            <div class="inputs-group">
+                                <input type="text" placeholder="رقم التليفون" value="${p.phone.replace(/"/g, '&quot;')}" oninput="updatePerson(${card.id}, ${i}, 'phone', this.value)">
+                                <input type="number" placeholder="سعر الباقة" value="${p.price || ''}" oninput="updatePerson(${card.id}, ${i}, 'price', Number(this.value))">
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            html += `
+                    </div>
+                    <div class="card-footer">
+                        <span style="font-size: 0.8rem; color: #64748b;">حفظ الخانة دي:</span>
+                        <button class="btn btn-success" style="width: auto; padding: 6px 14px; font-size: 0.85rem;" onclick="saveSingleCard(${card.id})">حفظ الخانة</button>
+                    </div>
+                </div>
+            `;
+            container.innerHTML += html;
+        });
+    }
+</script>
+
+</body>
+</html>
